@@ -32,20 +32,6 @@ public class AIConfig {
                 .build();
     }
 
-    @Bean("reasonDeepSeekClient")
-    public ChatClient reasonDeepSeekClient(DateTools dateTools, DeepSeekChatModel deepSeekChatModel, ChatMemory chatMemory) {
-        return ChatClient.builder(deepSeekChatModel)
-                .defaultOptions(DeepSeekChatOptions.builder()
-                        .model(DeepSeekApi.ChatModel.DEEPSEEK_REASONER.value)
-                        .build())
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                .defaultSystem("""
-                        你是一个乐观的小助手
-                        """)
-                .defaultTools(dateTools)
-                .build();
-    }
-
     @Bean
     public ChatMemory chatMemory() {
         return MessageWindowChatMemory.builder().maxMessages(20).build();
