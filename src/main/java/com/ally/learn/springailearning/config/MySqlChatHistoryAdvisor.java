@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2025-06-09
  * @Version 1.0
  **/
-@Component
 public class MySqlChatHistoryAdvisor implements CallAdvisor, StreamAdvisor {
 
     private static final Logger logger = LoggerFactory.getLogger(MySqlChatHistoryAdvisor.class);

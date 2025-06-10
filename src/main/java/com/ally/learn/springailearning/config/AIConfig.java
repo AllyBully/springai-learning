@@ -25,7 +25,7 @@ public class AIConfig {
     @Bean("deepSeekClient")
     public ChatClient deepSeekClient(DateTools dateTools, DeepSeekChatModel deepSeekChatModel, ChatMemory chatMemory) {
         return ChatClient.builder(deepSeekChatModel)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build(), MySqlChatHistoryAdvisor.builder().build())
+                .defaultAdvisors(CustomMessageChatMemoryAdvisor.builder(chatMemory).build(), MySqlChatHistoryAdvisor.builder().build())
                 .defaultSystem("""
                         你是一个乐观的小助手
                         """)
