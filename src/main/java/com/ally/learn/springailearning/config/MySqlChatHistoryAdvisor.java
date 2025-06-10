@@ -63,11 +63,11 @@ public class MySqlChatHistoryAdvisor implements CallAdvisor, StreamAdvisor {
     }
 
     private void addHistory(ChatClientRequest request) {
-        logger.debug("add request: {}", request);
+        logger.info("add request: {}", request);
     }
 
     private void addHistory(ChatClientResponse chatClientResponse) {
-        logger.debug("add response: {}", chatClientResponse.chatResponse());
+        logger.info("add response: {}", chatClientResponse.chatResponse());
     }
 
     @Override
