@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.*;
-import org.springframework.ai.chat.model.MessageAggregator;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
@@ -66,7 +65,7 @@ public class MySqlChatHistoryAdvisor implements CallAdvisor, StreamAdvisor {
     }
 
     private void addHistory(ChatClientResponse chatClientResponse) {
-        logger.debug("response: {}", chatClientResponse.chatResponse());
+        logger.debug("add response: {}", chatClientResponse.chatResponse());
     }
 
     @Override
