@@ -16,7 +16,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-
+/**
+ * @author cgl
+ * @description 自定义消息聚合器，支持DeepSeek的reasoningContent
+ * @date 2025-06-10
+ * @Version 1.0
+ **/
 public class MessageAggregator {
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageAggregator.class);

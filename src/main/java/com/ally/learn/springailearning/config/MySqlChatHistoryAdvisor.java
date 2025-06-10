@@ -50,7 +50,10 @@ public class MySqlChatHistoryAdvisor implements CallAdvisor, StreamAdvisor {
         addHistory(chatClientRequest);
         AtomicReference<Map<String, Object>> context = new AtomicReference<>(new HashMap<>());
         Flux<ChatClientResponse> chatClientResponses = streamAdvisorChain.nextStream(chatClientRequest);
-        return new MessageAggregator().aggregate(chatClientResponses.mapNotNull(ChatClientResponse::chatResponse), aggregatedChatResponse -> {
+        return new MessageAggregator().aggregate(chatClientResponses.mapNotNull(chatClientResponse -> {
+            context.get().putAll(chatClientResponse.context());
+            return chatClientResponse.chatResponse();
+        }), aggregatedChatResponse -> {
             ChatClientResponse aggregatedChatClientResponse = ChatClientResponse.builder()
                     .chatResponse(aggregatedChatResponse)
                     .context(context.get())
