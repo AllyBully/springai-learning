@@ -19,17 +19,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author cgl
- * @description
+ * @description 自定义聊天内存顾问，专门负责聊天记忆管理
  * @date 2025-06-10
  * @Version 1.0
  **/
 public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
     private final ChatMemory chatMemory;
-
     private final String defaultConversationId;
-
     private final int order;
-
     private final Scheduler scheduler;
 
     private CustomMessageChatMemoryAdvisor(ChatMemory chatMemory, String defaultConversationId, int order,
@@ -103,18 +100,18 @@ public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
                 .map(request -> this.before(request, streamAdvisorChain))
                 .flatMapMany(streamAdvisorChain::nextStream)
                 .transform(flux -> {
-                            AtomicReference<Map<String, Object>> context = new AtomicReference<>(new HashMap<>());
+                    AtomicReference<Map<String, Object>> context = new AtomicReference<>(new HashMap<>());
 
-                            return new MessageAggregator().aggregate(flux.mapNotNull(chatClientResponse -> {
-                                context.get().putAll(chatClientResponse.context());
-                                return chatClientResponse.chatResponse();
-                            }), aggregatedChatResponse -> {
-                                ChatClientResponse aggregatedChatClientResponse = ChatClientResponse.builder()
-                                        .chatResponse(aggregatedChatResponse)
-                                        .context(context.get())
-                                        .build();
-                                this.after(aggregatedChatClientResponse, streamAdvisorChain);
-                            }).map(chatResponse -> ChatClientResponse.builder().chatResponse(chatResponse).context(context.get()).build());
+                    return new MessageAggregator().aggregate(flux.mapNotNull(chatClientResponse -> {
+                        context.get().putAll(chatClientResponse.context());
+                        return chatClientResponse.chatResponse();
+                    }), aggregatedChatResponse -> {
+                        ChatClientResponse aggregatedChatClientResponse = ChatClientResponse.builder()
+                                .chatResponse(aggregatedChatResponse)
+                                .context(context.get())
+                                .build();
+                        this.after(aggregatedChatClientResponse, streamAdvisorChain);
+                    }).map(chatResponse -> ChatClientResponse.builder().chatResponse(chatResponse).context(context.get()).build());
                 });
     }
 
@@ -125,11 +122,8 @@ public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
     public static final class Builder {
 
         private String conversationId = ChatMemory.DEFAULT_CONVERSATION_ID;
-
         private int order = Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER;
-
         private Scheduler scheduler = BaseAdvisor.DEFAULT_SCHEDULER;
-
         private ChatMemory chatMemory;
 
         private Builder(ChatMemory chatMemory) {
@@ -168,6 +162,5 @@ public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
         public CustomMessageChatMemoryAdvisor build() {
             return new CustomMessageChatMemoryAdvisor(this.chatMemory, this.conversationId, this.order, this.scheduler);
         }
-
     }
 }

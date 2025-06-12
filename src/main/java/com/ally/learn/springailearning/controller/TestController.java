@@ -34,14 +34,14 @@ public class TestController {
     @PostMapping(value = "/ai/streamChat", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<AssistantMessage> generateStream(@RequestBody ChatMessage message) {
         Boolean thinkingMode = message.getThinkingMode();
-        Flux<AssistantMessage> result = chatClient.prompt(new Prompt(message.getPrompt()))
+        // 流控制逻辑已经在CustomMessageChatMemoryAdvisor中处理，这里不再需要takeUntilOther
+        return chatClient.prompt(new Prompt(message.getPrompt()))
                 .options(DeepSeekChatOptions.builder()
                         .model(thinkingMode ? DeepSeekApi.ChatModel.DEEPSEEK_REASONER.value : DeepSeekApi.ChatModel.DEEPSEEK_CHAT.value)
                         .build())
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, message.getChatSessionId()))
                 .stream().chatResponse()
                 .map(chatResponse -> chatResponse.getResult().getOutput());
-        return result.takeUntilOther(streamControlService.getCancelSignal(message.getChatSessionId()));
     }
 
     @GetMapping("/ai/stopStream")

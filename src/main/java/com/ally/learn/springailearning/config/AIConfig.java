@@ -19,9 +19,21 @@ import org.springframework.context.annotation.Configuration;
 public class AIConfig {
 
     @Bean("deepSeekClient")
-    public ChatClient deepSeekClient(DateTools dateTools, DeepSeekChatModel deepSeekChatModel, ChatMemory chatMemory) {
+    public ChatClient deepSeekClient(DateTools dateTools, 
+                                   DeepSeekChatModel deepSeekChatModel, 
+                                   ChatMemory chatMemory,
+                                   StreamControlService streamControlService) {
         return ChatClient.builder(deepSeekChatModel)
-                .defaultAdvisors(CustomMessageChatMemoryAdvisor.builder(chatMemory).build(), MySqlChatHistoryAdvisor.builder().build())
+                .defaultAdvisors(
+                    // 流控制advisor - 最高优先级，最先执行
+                    StreamControlAdvisor.builder(streamControlService)
+                        .order(50)
+                        .build(),
+                    // 聊天记忆advisor
+                    CustomMessageChatMemoryAdvisor.builder(chatMemory).build(),
+                    // 历史记录advisor
+                    MySqlChatHistoryAdvisor.builder().build()
+                )
                 .defaultSystem("""
                         你是一个乐观的小助手
                         """)
