@@ -36,7 +36,7 @@ public class StreamControlAdvisor implements StreamAdvisor {
         // 从context中获取会话ID
         String sessionId = getSessionId(chatClientRequest);
         
-        logger.debug("Stream control advisor activated for session: {}", sessionId);
+        logger.info("Stream control advisor activated for session: {}", sessionId);
         
         return streamAdvisorChain.nextStream(chatClientRequest)
                 .publishOn(scheduler)
@@ -45,7 +45,7 @@ public class StreamControlAdvisor implements StreamAdvisor {
                     logger.info("Stream cancelled for session: {}", sessionId);
                 })
                 .doFinally(signalType -> {
-                    logger.debug("Stream finished with signal: {} for session: {}", signalType, sessionId);
+                    logger.info("Stream finished with signal: {} for session: {}", signalType, sessionId);
                 });
     }
     
