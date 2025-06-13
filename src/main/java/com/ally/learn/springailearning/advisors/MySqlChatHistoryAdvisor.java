@@ -1,10 +1,13 @@
-package com.ally.learn.springailearning.config;
+package com.ally.learn.springailearning.advisors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.*;
+
+import com.ally.learn.springailearning.config.MessageAggregator;
+
 import reactor.core.publisher.Flux;
 
 import java.util.HashMap;

@@ -1,5 +1,8 @@
 package com.ally.learn.springailearning.config;
 
+import com.ally.learn.springailearning.advisors.CustomMessageChatMemoryAdvisor;
+import com.ally.learn.springailearning.advisors.MySqlChatHistoryAdvisor;
+import com.ally.learn.springailearning.advisors.StreamControlAdvisor;
 import com.ally.learn.springailearning.tool.DateTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;

@@ -23,7 +23,7 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
  * @Version 1.0
  **/
 @RestController
-public class TestController {
+public class ChatController {
 
     @Resource(name = "deepSeekClient")
     public ChatClient chatClient;
