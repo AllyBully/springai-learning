@@ -1,6 +1,6 @@
-package com.ally.learn.springailearning.config;
+package com.ally.learn.springailearning.common.config;
 
-import com.ally.learn.springailearning.repository.RedisChatMemoryRepository;
+import com.ally.learn.springailearning.common.repository.RedisChatMemoryRepository;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.context.annotation.Bean;

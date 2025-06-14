@@ -1,4 +1,4 @@
-package com.ally.learn.springailearning.config;
+package com.ally.learn.springailearning.common.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

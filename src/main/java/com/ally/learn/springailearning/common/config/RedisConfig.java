@@ -1,4 +1,4 @@
-package com.ally.learn.springailearning.config;
+package com.ally.learn.springailearning.common.config;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;

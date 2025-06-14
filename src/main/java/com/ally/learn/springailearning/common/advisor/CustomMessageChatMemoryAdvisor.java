@@ -1,4 +1,4 @@
-package com.ally.learn.springailearning.advisors;
+package com.ally.learn.springailearning.common.advisor;
 
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
@@ -8,7 +8,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.util.Assert;
 
-import com.ally.learn.springailearning.config.MessageAggregator;
+import com.ally.learn.springailearning.common.config.MessageAggregator;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

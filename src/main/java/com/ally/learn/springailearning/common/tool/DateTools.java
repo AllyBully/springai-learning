@@ -1,4 +1,4 @@
-package com.ally.learn.springailearning.tool;
+package com.ally.learn.springailearning.common.tool;
 
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.context.i18n.LocaleContextHolder;

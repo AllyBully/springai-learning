@@ -1,14 +1,12 @@
-package com.ally.learn.springailearning.advisors;
+package com.ally.learn.springailearning.common.advisor;
 
+import com.ally.learn.springailearning.common.service.StreamControlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.*;
 import org.springframework.ai.chat.memory.ChatMemory;
-
-import com.ally.learn.springailearning.config.StreamControlService;
-
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -16,7 +14,7 @@ import reactor.core.scheduler.Schedulers;
 /**
  * @author cgl
  * @description 流控制Advisor - 专门负责处理流的停止控制
- * @date 2025-06-10
+ * @date 2025-06-13
  * @Version 1.0
  **/
 public class StreamControlAdvisor implements StreamAdvisor {
@@ -39,7 +37,7 @@ public class StreamControlAdvisor implements StreamAdvisor {
         // 从context中获取会话ID
         String sessionId = getSessionId(chatClientRequest);
         
-        logger.info("Stream control advisor activated for session: {}", sessionId);
+        logger.debug("Stream control advisor activated for session: {}", sessionId);
         
         return streamAdvisorChain.nextStream(chatClientRequest)
                 .publishOn(scheduler)
@@ -48,7 +46,7 @@ public class StreamControlAdvisor implements StreamAdvisor {
                     logger.info("Stream cancelled for session: {}", sessionId);
                 })
                 .doFinally(signalType -> {
-                    logger.info("Stream finished with signal: {} for session: {}", signalType, sessionId);
+                    logger.debug("Stream finished with signal: {} for session: {}", signalType, sessionId);
                 });
     }
     
