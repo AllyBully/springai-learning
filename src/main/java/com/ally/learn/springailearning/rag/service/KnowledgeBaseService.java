@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.filter.Filter;
-import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author cgl
  * @description 知识库管理服务
+ * 使用知识库ID作为Weaviate className，简化管理
  * @date 2025-06-13
  * @Version 1.0
  **/
@@ -27,12 +27,12 @@ public class KnowledgeBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(KnowledgeBaseService.class);
 
-    private final MilvusVectorStore vectorStore;
+    private final WeaviateVectorStoreFactory vectorStoreFactory;
     // 简单的内存存储，实际应用中应该使用数据库
     private final Map<String, KnowledgeBase> knowledgeBaseMap = new ConcurrentHashMap<>();
 
-    public KnowledgeBaseService(MilvusVectorStore vectorStore) {
-        this.vectorStore = vectorStore;
+    public KnowledgeBaseService(WeaviateVectorStoreFactory vectorStoreFactory) {
+        this.vectorStoreFactory = vectorStoreFactory;
     }
 
     /**
@@ -51,8 +51,12 @@ public class KnowledgeBaseService {
                 .build();
 
         try {
+            // 创建知识库的同时创建对应的向量存储
+            vectorStoreFactory.createVectorStore(id);
+            
             knowledgeBaseMap.put(id, knowledgeBase);
-            logger.info("Created knowledge base: {}", knowledgeBase.getName());
+            logger.info("Created knowledge base: {} with ID: {} (Weaviate className created)", 
+                    knowledgeBase.getName(), knowledgeBase.getId());
             return knowledgeBase;
         } catch (Exception e) {
             logger.error("Failed to create knowledge base: {}", request.getName(), e);
@@ -89,7 +93,7 @@ public class KnowledgeBaseService {
         knowledgeBase.setUpdateTime(LocalDateTime.now());
 
         knowledgeBaseMap.put(id, knowledgeBase);
-        logger.info("Updated knowledge base: {}", knowledgeBase.getName());
+        logger.info("Updated knowledge base: {} with ID: {}", knowledgeBase.getName(), knowledgeBase.getId());
         return knowledgeBase;
     }
 
@@ -100,14 +104,14 @@ public class KnowledgeBaseService {
         KnowledgeBase knowledgeBase = getKnowledgeBase(id);
 
         try {
+            // 从内存中移除知识库记录
             knowledgeBaseMap.remove(id);
-            // 创建过滤器，只搜索指定知识库的文档
-            Filter.Expression filter = new Filter.Expression(
-                    Filter.ExpressionType.EQ,
-                    new Filter.Key("knowledge_base_id"),
-                    new Filter.Value(id));
-            vectorStore.delete(filter);
-            logger.info("Deleted knowledge base: {}", knowledgeBase.getName());
+            
+            // 删除整个Weaviate class和向量存储实例
+            vectorStoreFactory.deleteVectorStore(id);
+            
+            logger.info("Deleted knowledge base: {} with ID: {} (Weaviate class deleted)", 
+                    knowledgeBase.getName(), knowledgeBase.getId());
         } catch (Exception e) {
             logger.error("Failed to delete knowledge base: {}", id, e);
             throw new RuntimeException("删除知识库失败: " + e.getMessage());
@@ -121,10 +125,13 @@ public class KnowledgeBaseService {
         KnowledgeBase knowledgeBase = getKnowledgeBase(knowledgeBaseId);
 
         try {
-            // 添加知识库ID到文档元数据
+            // 获取对应的向量存储实例
+            VectorStore vectorStore = vectorStoreFactory.getVectorStore(knowledgeBaseId);
+            
+            // 只添加必要的元数据，不需要knowledge_base_id（因为已通过className隔离）
             documents.forEach(doc -> {
-                doc.getMetadata().put("knowledge_base_id", knowledgeBaseId);
                 doc.getMetadata().put("knowledge_base_name", knowledgeBase.getName());
+                doc.getMetadata().put("created_time", LocalDateTime.now().toString());
             });
             vectorStore.add(documents);
 
@@ -133,7 +140,8 @@ public class KnowledgeBaseService {
             knowledgeBase.setUpdateTime(LocalDateTime.now());
             knowledgeBaseMap.put(knowledgeBaseId, knowledgeBase);
 
-            logger.info("Added {} documents to knowledge base: {}", documents.size(), knowledgeBase.getName());
+            logger.info("Added {} documents to knowledge base: {} (className: {})", 
+                    documents.size(), knowledgeBase.getName(), knowledgeBaseId);
         } catch (Exception e) {
             logger.error("Failed to add documents to knowledge base: {}", knowledgeBaseId, e);
             throw new RuntimeException("添加文档失败: " + e.getMessage());
@@ -144,24 +152,25 @@ public class KnowledgeBaseService {
      * 搜索知识库
      */
     public List<Document> search(SearchRequest searchRequest, String knowledgeBaseId) {
-        KnowledgeBase knowledgeBase = getKnowledgeBase(knowledgeBaseId);
-
         try {
-            // 创建过滤器，只搜索指定知识库的文档
-            Filter.Expression filter = new Filter.Expression(
-                    Filter.ExpressionType.EQ,
-                    new Filter.Key("knowledge_base_id"),
-                    new Filter.Value(knowledgeBaseId));
-
+            KnowledgeBase knowledgeBase = getKnowledgeBase(knowledgeBaseId);
+            
+            // 获取对应的向量存储实例（已通过className完全隔离，无需过滤器）
+            VectorStore vectorStore = vectorStoreFactory.getVectorStore(knowledgeBaseId);
+            
+            // 直接在对应的向量存储中搜索，无需过滤器
             SearchRequest vectorSearchRequest =
                     SearchRequest.builder()
                             .query(searchRequest.getQuery())
                             .topK(searchRequest.getTopK())
                             .similarityThreshold(searchRequest.getSimilarityThreshold())
-                            .filterExpression(filter)
                             .build();
-
-            return vectorStore.similaritySearch(vectorSearchRequest);
+            
+            List<Document> results = vectorStore.similaritySearch(vectorSearchRequest);
+            logger.info("Search knowledge base: {} (className: {}), found {} documents", 
+                    knowledgeBase.getName(), knowledgeBaseId, results.size());
+            
+            return results;
         } catch (Exception e) {
             logger.error("Failed to search knowledge base: {}", knowledgeBaseId, e);
             throw new RuntimeException("搜索失败: " + e.getMessage());

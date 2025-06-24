@@ -9,8 +9,6 @@ import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.ai.vectorstore.filter.Filter;
-import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -39,17 +37,15 @@ public class DocumentService {
     
     private final KnowledgeBaseService knowledgeBaseService;
     private final TextSplitter textSplitter;
-    private final MilvusVectorStore vectorStore;
     // 简单的内存存储，实际应用中应该使用数据库
     private final Map<String, DocumentInfo> documentMap = new ConcurrentHashMap<>();
     
     // 文件存储路径
     private final String uploadPath = "uploads/documents/";
 
-    public DocumentService(KnowledgeBaseService knowledgeBaseService, MilvusVectorStore vectorStore) {
+    public DocumentService(KnowledgeBaseService knowledgeBaseService) {
         this.knowledgeBaseService = knowledgeBaseService;
         this.textSplitter = new TokenTextSplitter();
-        this.vectorStore = vectorStore;
         
         // 创建上传目录
         try {
@@ -200,13 +196,9 @@ public class DocumentService {
             Files.deleteIfExists(Paths.get(documentInfo.getFilePath()));
             documentMap.remove(documentId);
             
-            // 从向量数据库中删除对应的文档块
-            Filter.Expression filter = new Filter.Expression(
-                    Filter.ExpressionType.EQ,
-                    new Filter.Key("document_id"),
-                    new Filter.Value(documentId));
-            vectorStore.delete(filter);
             logger.info("Deleted document: {}", documentInfo.getName());
+            // 注意：这里不再直接删除向量数据，因为当知识库删除时会统一清理
+            // 如果需要单独删除文档的向量数据，需要通过知识库服务来处理
         } catch (IOException e) {
             logger.error("Failed to delete document file: {}", documentInfo.getFilePath(), e);
             throw new RuntimeException("删除文档失败: " + e.getMessage());

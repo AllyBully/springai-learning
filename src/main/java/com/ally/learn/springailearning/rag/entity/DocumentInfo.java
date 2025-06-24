@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author cgl
- * @description 文档实体
+ * @description 文档信息实体
  * @date 2025-06-13
  * @Version 1.0
  **/
@@ -30,5 +30,5 @@ public class DocumentInfo {
     private LocalDateTime uploadTime;
     private LocalDateTime processTime;
     private Integer chunkCount; // 分块数量
-    private String errorMessage; // 处理错误信息
+    private String errorMessage; // 错误信息
 } 

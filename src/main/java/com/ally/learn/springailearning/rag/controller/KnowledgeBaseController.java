@@ -5,6 +5,7 @@ import com.ally.learn.springailearning.rag.entity.KnowledgeBase;
 import com.ally.learn.springailearning.rag.service.KnowledgeBaseService;
 import jakarta.validation.Valid;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 /**
  * @author cgl
  * @description 知识库管理控制器
+ * 使用知识库ID作为Weaviate className，简化API设计
  * @date 2025-06-13
  * @Version 1.0
  **/
@@ -72,5 +74,25 @@ public class KnowledgeBaseController {
     public ResponseEntity<Map<String, String>> deleteKnowledgeBase(@PathVariable String id) {
         knowledgeBaseService.deleteKnowledgeBase(id);
         return ResponseEntity.ok(Map.of("message", "知识库删除成功"));
+    }
+
+    /**
+     * 在指定知识库中搜索
+     */
+    @PostMapping("/{id}/search")
+    public ResponseEntity<List<Document>> searchInKnowledgeBase(
+            @PathVariable String id,
+            @RequestParam String query,
+            @RequestParam(defaultValue = "5") int topK,
+            @RequestParam(defaultValue = "0.7") double similarityThreshold) {
+        
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(query)
+                .topK(topK)
+                .similarityThreshold(similarityThreshold)
+                .build();
+        
+        List<Document> results = knowledgeBaseService.search(searchRequest, id);
+        return ResponseEntity.ok(results);
     }
 } 

@@ -71,7 +71,7 @@
         <!-- Spring AI Vector Store -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-vector-store-milvus</artifactId>
+            <artifactId>spring-ai-starter-vector-store-weaviate</artifactId>
         </dependency>
         <!-- Document processing -->
         <dependency>
